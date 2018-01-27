@@ -11,7 +11,7 @@ import (
 // = - = - = - = - = - = - = - = -D=E-F=I-N=E- = - = - = - = - = - = - = - =
 type UserCardMask struct {
 	Name     string `db:"u_name"`
-	CardNo   string `db:"no"`
+	CardNo   string `db:"uc_no"`
 	BankName string `db:"b_name"`
 }
 
