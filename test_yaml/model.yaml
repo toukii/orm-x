@@ -1,0 +1,21 @@
+User:
+  name: user
+  alias: u
+  columns: ["id","name"]
+  mask:
+    Mask: ["name"]
+    
+UserCard:
+  name: user_card
+  alias: uc
+  columns: ["id","no","bank_id"]
+  mask:
+    Mask: ["no"]
+
+Bank:
+  name: bank
+  alias: b
+  columns: ["id","name"]
+  mask:
+    Mask: ["name"]
+

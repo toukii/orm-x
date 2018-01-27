@@ -1,0 +1,5 @@
+name: user_card
+alias: uc
+columns: ["id","no"]
+mask:
+  Mask: ["no"]

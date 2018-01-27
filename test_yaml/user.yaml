@@ -1,0 +1,5 @@
+name: user
+alias: u
+columns: ["id","name"]
+mask:
+  Mask: ["name"]
