@@ -13,9 +13,9 @@ Because refer to multi tables, columns should have an alias(use the default alia
 ## usage
 
 ```
-	m := NewMask("Mask", user, userCard, bank)
-	user.Select(m).InnerJoin(userCard, "u.id=uc.user_id").InnerJoin(bank, "uc.bank_id=b.id").Where("u.name='toukii'")
-	fmt.Println(user.Sql())
+m := NewMask("Mask", user, userCard, bank)
+user.Select(m).InnerJoin(userCard, "u.id=uc.user_id").InnerJoin(bank, "uc.bank_id=b.id").Where("u.name='toukii'")
+fmt.Println(user.Sql())
 ```
 
 `user`,`userCard`,`bank` are tableModel:
@@ -23,18 +23,18 @@ Because refer to multi tables, columns should have an alias(use the default alia
  - 1 use yaml parse
 
 ```
-	tb, err := MultiParse("test_yaml/model.yaml")
+tb, err := MultiParse("test_yaml/model.yaml")
 
-	user := tb["User"]
-	userCard := tb["UserCard"]
-	bank := tb["Bank"]
+user := tb["User"]
+userCard := tb["UserCard"]
+bank := tb["Bank"]
 ```
 
  - 2 new
 
 ```
-	user := NewT("user", "u", []string{"id", "name"})
-	user.Mask["Mask"] = []string{"name"}
+user := NewT("user", "u", []string{"id", "name"})
+user.Mask["Mask"] = []string{"name"}
 ```
 
 
