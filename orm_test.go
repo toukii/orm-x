@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"fmt"
 	"testing"
 
@@ -49,14 +50,87 @@ func TestQuery(t *testing.T) {
 	var mask []*UserCardMask
 	err = scanner.Scan(rows, &mask)
 	equal.Equal(nil, err, nil)
-	fmt.Printf("%+v\n", mask)
 	for _, m := range mask {
+		fmt.Printf("%+v\n", m)
+	}
+
+	user.Select(m).InnerJoin(userCard, "u.id=uc.user_id").InnerJoin(bank, "uc.bank_id=b.id").Where("u.name=?")
+	rows, err = Mysql().Query(user.Sql(), "toukii")
+	equal.Equal(nil, err, nil)
+
+	var mask2 []*UserCardMask
+	err = scanner.Scan(rows, &mask2)
+	equal.Equal(nil, err, nil)
+	for _, m := range mask2 {
 		fmt.Printf("%+v\n", m)
 	}
 }
 
 func TestExample(t *testing.T) {
 	ExampleScan()
+}
+
+func TestScan(t *testing.T) {
+	tb, err := MultiParse("test_yaml/model.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+
+	user := tb["User"]
+	userCard := tb["UserCard"]
+	bank := tb["Bank"]
+
+	m := NewMask("Mask", user, userCard, bank)
+
+	var mask []*UserCardMask
+	err = Mysql().Scan(user.Select(m).InnerJoin(userCard, "u.id=uc.user_id").InnerJoin(bank, "uc.bank_id=b.id").Where("u.name='toukii'"), &mask)
+	equal.Equal(nil, err, nil)
+	for _, m := range mask {
+		fmt.Printf("%+v\n", m)
+	}
+
+	var mask2 []*UserCardMask
+	err = Mysql().Scan(user.Select(m).InnerJoin(userCard, "u.id=uc.user_id").InnerJoin(bank, "uc.bank_id=b.id").Where("u.name=?"), &mask2, "toukii")
+	equal.Equal(nil, err, nil)
+	for _, m := range mask2 {
+		fmt.Printf("%+v\n", m)
+	}
+
+	var mask3 []*UserCardMask
+	scanLoopFun := ScanLoopFunc(func(rows *sql.Rows) {
+		for rows.Next() {
+			var mk UserCardMask
+			err := rows.Scan(&mk.Name, &mk.CardNo, &mk.BankName)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			mask3 = append(mask3, &mk)
+		}
+	})
+
+	err = Mysql().Scan(user.Select(m).InnerJoin(userCard, "u.id=uc.user_id").InnerJoin(bank, "uc.bank_id=b.id").Where("u.name=?"), scanLoopFun, "toukii")
+	equal.Equal(nil, err, nil)
+	for _, m := range mask3 {
+		fmt.Printf("%+v\n", m)
+	}
+
+	var mask4 []*UserCardMask
+	scanEachFun := ScanEachFunc(func(rows *sql.Rows) error {
+		var mk UserCardMask
+		err := rows.Scan(&mk.Name, &mk.CardNo, &mk.BankName)
+		if err != nil {
+			return err
+		}
+		mask4 = append(mask4, &mk)
+		return nil
+	})
+
+	err = Mysql().Scan(user.Select(m).InnerJoin(userCard, "u.id=uc.user_id").InnerJoin(bank, "uc.bank_id=b.id").Where("u.name=?"), scanEachFun, "toukii")
+	equal.Equal(nil, err, nil)
+	for _, m := range mask4 {
+		fmt.Printf("%+v\n", m)
+	}
 }
 
 // = - = - = - = - = - = - = - = -S=Q-L= - = - = - = - = - = - = - = - = - =

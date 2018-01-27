@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/didi/gendry/scanner"
@@ -25,4 +26,32 @@ func ExampleScan() {
 	for _, m := range mask {
 		fmt.Printf("%+v\n", m)
 	}
+}
+
+type ScanLoopFunc func(*sql.Rows)
+type ScanEachFunc func(rows *sql.Rows) error
+
+// if objOrFunc is func: either ScanLoopFunc or ScanEachFunc; or data-struct
+func (db *DBStore) Scan(t *T, objOrFunc interface{}, args ...interface{}) error {
+	rows, err := db.Query(t.Sql(), args...)
+	if err != nil {
+		return err
+	}
+	scanLoopFunc, ok := objOrFunc.(ScanLoopFunc)
+	if ok {
+		scanLoopFunc(rows)
+		return nil
+	}
+	scanEachFunc, ok := objOrFunc.(ScanEachFunc)
+	if ok {
+		for rows.Next() {
+			err := scanEachFunc(rows)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	return scanner.Scan(rows, objOrFunc)
 }

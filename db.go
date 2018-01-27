@@ -14,11 +14,15 @@ type Config struct {
 	Database string
 }
 
+type DBStore struct {
+	*sql.DB
+}
+
 var (
-	_db *sql.DB
+	_db *DBStore
 )
 
-func Mysql() *sql.DB {
+func Mysql() *DBStore {
 	return _db
 }
 
@@ -28,9 +32,12 @@ func SetUpMysql(cfg *Config) error {
 	dsn = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&autocommit=true&parseTime=True",
 		cfg.User, cfg.Passwd, cfg.Host, cfg.Port, cfg.Database)
 	var err error
-	_db, err = sql.Open("mysql", dsn)
+	rawdb, err := sql.Open("mysql", dsn)
 	if err != nil {
 		return err
+	}
+	_db = &DBStore{
+		rawdb,
 	}
 	return Mysql().Ping()
 }
