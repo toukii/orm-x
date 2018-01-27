@@ -43,18 +43,21 @@ func (t *T) aliasColumns() []string {
 	return prefixAlias(t.Alias, t.Columns)
 }
 
+//  INNER JOIN xx ON onsql
 func (t *T) InnerJoin(t2 *T, on string) *T {
 	ret := fmt.Sprintf(" INNER JOIN %s ON %s", t2.aliasTable(), on)
 	t._sql.WriteString(ret)
 	return t
 }
 
+//  LEFT JOIN xx ON onsql
 func (t *T) LeftJoin(t2 *T, on string) *T {
 	ret := fmt.Sprintf(" LEFT JOIN %s ON %s", t2.aliasTable(), on)
 	t._sql.WriteString(ret)
 	return t
 }
 
+// SELECT [mast]
 func (t *T) Select(mask *Mask) *T {
 	scol := ""
 	if mask == nil {
@@ -65,6 +68,13 @@ func (t *T) Select(mask *Mask) *T {
 	ret := fmt.Sprintf("SELECT %s FROM %s", scol, t.aliasTable())
 	t._sql.Reset()
 	t._sql.WriteString(ret)
+	return t
+}
+
+// WHERE cond
+func (t *T) Where(cond string) *T {
+	t._sql.WriteString(" WHERE ")
+	t._sql.WriteString(cond)
 	return t
 }
 

@@ -30,20 +30,20 @@ func init() {
 }
 
 func TestQuery(t *testing.T) {
-	mt, err := MultiParse("test_yaml/model.yaml")
+	tb, err := MultiParse("test_yaml/model.yaml")
 	if err != nil {
 		t.Error(err)
 	}
 
-	u := mt["User"]
-	uc := mt["UserCard"]
-	b := mt["Bank"]
+	user := tb["User"]
+	userCard := tb["UserCard"]
+	bank := tb["Bank"]
 
-	m := NewMask("Mask", u, uc, b)
-	u.Select(m).InnerJoin(uc, "u.id=uc.user_id").InnerJoin(b, "uc.bank_id=b.id")
-	fmt.Println(u.Sql())
+	m := NewMask("Mask", user, userCard, bank)
+	user.Select(m).InnerJoin(userCard, "u.id=uc.user_id").InnerJoin(bank, "uc.bank_id=b.id").Where("u.name='toukii'")
+	fmt.Println(user.Sql())
 
-	rows, err := Mysql().Query(u.Sql())
+	rows, err := Mysql().Query(user.Sql())
 	equal.Equal(nil, err, nil)
 
 	var mask []*UserCardMask
@@ -80,8 +80,8 @@ func TestInnerJoin(t *testing.T) {
 	t2 := NewT("user_card", "uc", []string{"user_id", "no"})
 	mask := NewMask("", t1, t2)
 
-	t1.Select(mask).InnerJoin(t2, "u.id=uc.user_id")
-	equal.Equal(nil, t1.Sql(), "SELECT u.id AS u_id, u.name AS u_name, uc.user_id AS uc_user_id, uc.no AS uc_no FROM user u INNER JOIN user_card uc ON u.id=uc.user_id")
+	t1.Select(mask).InnerJoin(t2, "u.id=uc.user_id").Where("u.name='toukii'")
+	equal.Equal(nil, t1.Sql(), "SELECT u.id AS u_id, u.name AS u_name, uc.user_id AS uc_user_id, uc.no AS uc_no FROM user u INNER JOIN user_card uc ON u.id=uc.user_id WHERE u.name='toukii'")
 }
 
 func TestParse(t *testing.T) {
@@ -94,6 +94,12 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	u.Select(nil)
+	equal.Equal(nil, u.Sql(), "SELECT u.id AS u_id, u.name AS u_name FROM user u")
+
+	u = NewT("user", "u", []string{"id", "name"})
+	u.Mask["Mask"] = []string{"name"}
 
 	u.Select(nil)
 	equal.Equal(nil, u.Sql(), "SELECT u.id AS u_id, u.name AS u_name FROM user u")
