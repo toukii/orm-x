@@ -8,7 +8,7 @@ User:
 UserCard:
   name: user_card
   alias: uc
-  columns: ["id","no","bank_id"]
+  columns: ["id","user_id","no","bank_id"]
   mask:
     Mask: ["no"]
 
